@@ -12,8 +12,8 @@
 // --visualize [starts a 3d window to see the orbit
 
 #define HELP_ME \
-"Odette - Orbit Determination and Ephemeris Toolset\n" \
-"--------------------------------------------------\n" \
+"Odette - Orbit Determination Technologies\n" \
+"-----------------------------------------\n" \
 "\n" \
 "Usage:\n" \
 "    odette [OPTIONS]\n" \

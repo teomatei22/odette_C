@@ -189,7 +189,7 @@ namespace interpret {
             if (entry.is_regular_file()) {
                 const auto &filename = entry.path().filename().string();
                 if (filename.contains(
-                    pattern.substr(0, pattern.find_last_of("*")))) {
+                    pattern.substr(0, pattern.find_last_of("^")))) {
                     auto data = parse_tdm(entry.path().string());
                     parsed.push_back(data);
                 }

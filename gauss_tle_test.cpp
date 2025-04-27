@@ -8,7 +8,7 @@
 #include "include/interpret.h"
 #include "include/orbmath.h"
 #include "include/TDMParser.h"
-#include "raylib.h"
+//#include "raylib.h"
 #include "solar_position.h"
 
 bool visual_test_gauss_tdm_benchmark() {
@@ -138,7 +138,8 @@ bool gauss_tle_altitude_test() {
     return true;
 }
 
-void propagate_tle_3d() {
+/*
+void propagate_tle_3d() { //TODO find method to interface to java
     const std::string line1 =
             "1 41240U 16002A   25100.23333006  .00000004  00000-0  28186-3 0  9990";
     const std::string line2 =
@@ -225,49 +226,17 @@ void propagate_tle_3d() {
     //--------------------------------------------------------------------------------------
 }
 
-void ecef_eci_test() {
 
-
-}
-
-void test_perturbations() {
-    // const std::string line1 =
-    //        "1 41240U 16002A   25100.23333006  .00000004  00000-0  28186-3 0  9990";
-    // const std::string line2 =
-    //         "2 41240  66.0422 314.5979 0007637 273.0322  86.9819 12.80929746431684";
-    // interpret::TwoLineElement a(line1, line2);
-    //
-    // auto r = a.getPosition();
-    // auto v = a.getVelocity();
-    // auto jd = a.getJD();
-    // auto r_eci = utils::ECIFrame(r, jd);
-    // auto v_eci = utils::ECIFrame(v, jd);
-    // auto r_ecef = utils::ECEFFrame(r_eci, jd);
-    // auto v_ecef = utils::ECEFFrame(v_eci, jd);
-    //
-    // auto a_j2 = orbmath::perturbation::J2_perturbation(r_ecef).transpose();
-    // std::cout << "J2: " << a_j2 << ' ' << a_j2.norm() << std::endl;
-    //
-    // auto a_tb = orbmath::perturbation::third_body(r_ecef, jd).transpose();
-    // std::cout << "Third body: " << a_tb << ' ' << a_tb.norm() << std::endl;
-    //
-    // auto a_sol = orbmath::perturbation::solar_radiation(r_ecef, jd).transpose();
-    // std::cout << "Solar: " << a_sol << ' ' << a_sol.norm() << std::endl;
-    //
-    // auto a_atm = orbmath::perturbation::atmospheric_drag_exponential(r_ecef, v_ecef).transpose();
-    // std::cout << "Atmospheric drag: " << a_atm << ' ' << a_atm.norm() << std::endl;
-}
-
-void test_velocity_verlet_integration() {
+void test_rk45_integration() {
 
     auto tdms = interpret::parse_tdm_w(
                     "data/Jason/20240318_16002A_A*", 130, 5);
     std::cout << tdms.observations.size() << std::endl;
-    auto radec = interpret::RADec(tdms.observations);
+    auto radec = interpret::RADec(tdms.observations); // radec = RADec(obs)
 
-    auto r_init = radec.get_position();
-    auto v_init = radec.get_velocity();
-    auto jd_init = radec.m_epoch;
+    auto r_init = radec.get_position(); // r_init = radec.get_position()
+    auto v_init = radec.get_velocity(); // v_init = radec.get_velocity()
+    auto jd_init = radec.m_epoch; // jd_init = radec.m_epoch
     std::vector<double> epochs;
     epochs.push_back(jd_init);
     for (int i = 0; i < 1000; i++) {
@@ -357,11 +326,7 @@ void test_velocity_verlet_integration() {
     //-----------------------------------------------
 
 }
-/*
-1 41240U 16002A   24078.54273252 -.00000041  00000-0  87212-4 0  9991
-2 41240  66.0433  39.6041 0008216 275.2526  84.7552 12.80929447381890
 
- */
 void draw_combined_orbits() {
     // --- TLE propagation ---
     const std::string line1 = // TLE from 2024-03-19
@@ -489,7 +454,7 @@ void draw_combined_orbits() {
 
     CloseWindow();
 }
-
+*/
 
 /*
 1 41240U 16002A   24078.93311235 -.00000041  00000-0  88455-4 0  9998
@@ -555,7 +520,7 @@ void test_orbital_element_err() {
         }
 
         std::ostringstream oe_csv_name("");
-        oe_csv_name << "oe_err_" << combi << ".csv";
+        oe_csv_name << "log_orbital_elem/_oe_err_" << combi << ".csv"; //TODO create folder if does not exist
         std::ofstream oe_csv(oe_csv_name.str());
         oe_csv_name << ".log";
         std::ofstream oe_log(oe_csv_name.str());
@@ -589,85 +554,14 @@ void test_orbital_element_err() {
     }
 }
 
-void compare_pants() {
-    const std::string line1 = // TLE from 2024-03-19
-        "1 41240U 16002A   24078.93311235 -.00000041  00000-0  88455-4 0  9998";
-    const std::string line2 =
-        "2 41240  66.0433  38.7934 0008217 275.1931  84.8147 12.80929479381943";
-
-
-    interpret::TwoLineElement tle(line1, line2);
-    double jd_tle = tle.get_jd();
-    double offset_tle = 0;
-
-    auto tdms = interpret::parse_tdm_w(
-                  "data/Jason/20240318_16002A_A*", 100, 30);
-    std::cout << tdms.observations.size() << std::endl;
-    auto radec = interpret::RADec(tdms.observations);
-
-    // Initialize state vector with r, v Gauss
-    auto r_init = radec.get_position();
-    auto v_init = radec.get_velocity();
-    auto jd_tdm = radec.m_epoch; // the epoch of the Gauss output (i.e. 2nd obs)
-
-    auto timediff = jd_tdm - jd_tle;
-    std::vector<double> epochs; // time of integration of RK45
-    std::vector<double> tle_epochs; // time of propagation TLE
-
-
-    std::vector<Eigen::Vector3d> r_tle;
-    std::vector<Eigen::Vector3d> v_tle;
-    std::vector<Eigen::Vector3d> r_rk45;
-    std::vector<Eigen::Vector3d> v_rk45;
-
-    for (double dt = 0; dt < 112.5; dt+=0.5) {
-        epochs.push_back(jd_tdm + dt * 60 / orbmath::SECONDS_PER_DAY);
-    }
-
-    propagate::Propagator rk45(r_init, v_init, epochs, propagate::integrators::rk45_eci);
-    rk45.j2 = true;
-    rk45.tb = false;
-    rk45.solar = false;
-    rk45.atm_exp = false;
-    rk45.compute();
-
-    for (offset_tle = 0; offset_tle < 1000000; offset_tle+=10) {
-        int i = 0;
-        for (double dt = 0; dt < 112; dt+=0.5) {
-            auto v = tle.get_velocity(dt * 60 / orbmath::SECONDS_PER_DAY + offset_tle);
-
-            if ((v-rk45.ephem.velocities[i]).norm() > 1) {
-                continue;
-            }
-            i++;
-        }
-
-        if (i >= 223) {
-            break;
-        }
-    }
-
-    int i = 0;
-    for (double dt = 0; dt < 112; dt+=0.5) {
-        auto r_tle = tle.get_position( dt * 60 / orbmath::SECONDS_PER_DAY + offset_tle);
-
-        std::cout << "TLE: " << r_tle.transpose() << " RADec: " << rk45.ephem.positions[i].transpose() << std::endl;
-        i++;
-    }
-}
-
 int main() {
     // visual_test_gauss_tdm_benchmark();
     // gauss_tle_altitude_test();
     // propagate_tle_3d();
 
-    // ecef_eci_test();
-
-    // test_perturbations();
-    // test_velocity_verlet_integration();
+    // test_rk45_integration();
     test_orbital_element_err();
 
-    // compare_pants();
     // draw_combined_orbits();
     // test_sgp4_vs_rk45_propagation();
     // test_orbital_element_mse_rk45_vs_sgp4();
