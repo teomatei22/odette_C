@@ -47,23 +47,6 @@ struct StateVectors {
     Eigen::Vector3d v;    // Velocity vector in meters per second.
 };
 
-// -----------------------------------------------------------------------------
-// Function: solveRadecOrbit
-//
-// Computes a preliminary orbit from at least three RA/Dec observations using
-// Gauss's method along with full-precision FG series propagation. The gravitational
-// parameter (mu) is used in the orbit determination process.
-//
-// Parameters:
-//   observations - Vector of Observation objects. Must contain at least three entries.
-//   mu           - Gravitational parameter in m³/s².
-//
-// Returns:
-//   A StateVectors structure containing the computed orbit state at the middle epoch.
-// -----------------------------------------------------------------------------
-StateVectors solveRadecOrbit(const std::vector<Observation>& observations, double mu);
-//TODO modify
-
 
 // -----------------------------------------------------------------------------
 // Abstract Class: InterpretationData
